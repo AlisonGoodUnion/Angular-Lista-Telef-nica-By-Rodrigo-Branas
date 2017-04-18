@@ -31,25 +31,49 @@
 	<script src="lib/angular/angular-messages.js"></script>
 	<script>
 		angular.module("listaTelefoneica", ["ngMessages"]);
-		angular.module("listaTelefoneica").controller("listaTelefoneicaCtrl", function ($scope, $filter, uppercaseFilter){
+		angular.module("listaTelefoneica").controller("listaTelefoneicaCtrl", function ($scope, $filter, uppercaseFilter, $http){
 			$scope.app = "Lista Telefonica";
-			// aplicanto filter no controller.
-			$scope.contatos = [
-				{nome: $filter('uppercase')("Pedro"), telefone: "98898899", data: new Date(), operadora: {nome: "Oi", codigo: 14, categoria: "Celular"}, cor: "blue"},
-			 	{nome: uppercaseFilter("Joao") , telefone: "67898899", data: new Date(), operadora: {nome: "Tim", codigo: 15, categoria: "Celular"}, cor: "yellow"},
-			 	{nome: "Maria", telefone: "89898899", data: new Date(), operadora: {nome: "Vivo", codigo: 41, categoria: "Celular"}, cor: "red"}];
+			$scope.contatos = [];
+			$scope.operadoras = [];
 
-			$scope.operadoras = [
-								{nome: "Oi", codigo: 14, categoria: "Celular", preco: 2},
-								{nome: "Tim", codigo: 15, categoria: "Celular", preco: 5},
-								{nome: "Vivo", codigo: 41, categoria: "Celular", preco: 1},
-								{nome: "GVT", codigo: 12, categoria: "Fixo", preco: 2},
-								{nome: "Embratel", codigo: 21, categoria: "Fixo", preco: 3}];
+// aplicanto filter no controller.
+//			$scope.contatos = [
+//				{nome: $filter('uppercase')("Pedro"), telefone: "98898899", data: new Date(), 	operadora: {nome: "Oi", codigo: 14, categoria: "Celular"}, cor: "blue"},
+//			 	{nome: uppercaseFilter("Joao") , telefone: "67898899", data: new Date(), operadora: {nome: "Tim", codigo: 15, categoria: "Celular"}, cor: "yellow"},
+//			 	{nome: "Maria", telefone: "89898899", data: new Date(), operadora: {nome: "Vivo", codigo: 41, categoria: "Celular"}, cor: "red"}];
+
+//			$scope.operadoras = [
+//								{nome: "Oi", codigo: 14, categoria: "Celular", preco: 2},
+//								{nome: "Tim", codigo: 15, categoria: "Celular", preco: 5},
+//								{nome: "Vivo", codigo: 41, categoria: "Celular", preco: 1},
+//								{nome: "GVT", codigo: 12, categoria: "Fixo", preco: 2},
+//								{nome: "Embratel", codigo: 21, categoria: "Fixo", preco: 3}];
+
+			var carregarContatos = function () {
+				$http.get("http://localhost:3412/contatos").success(function (data, status){
+					$scope.contatos = data;
+				}).error(function(data, status){
+					$scope.message = "aconteceu problema:" + data;
+				});
+			};
+
+			var carregarOperadoras = function (){
+				$http.get("http://localhost:3412/operadoras").success(function (data, status){
+					$scope.operadoras = data;
+				}).error(function(data, status){
+					$scope.message = "aconteceu problema:" + data;
+				});;
+			};
 
 			$scope.adicionarContato = function (contato) {
-				$scope.contatos.push(angular.copy(contato));
-				delete $scope.contato;
-				$scope.contatoForm.$setPristine();//volta a ser virgem!
+				contato.data = new Date();
+				$http.post("http://localhost:3412/contatos", contato).success(function (data){
+					delete $scope.contato;	
+					$scope.contatoForm.$setPristine();//campo volta a ser virgem!
+					carregarContatos();
+				}).error(function(data, status){
+					$scope.message = "aconteceu problema:" + data;
+				});;
 			};
 
 			$scope.apagarContatos = function (contatos) {
@@ -69,6 +93,10 @@
 				$scope.criterioDeOrdenacao = campo;
 				$scope.direcaoDaOrdenacao = !$scope.direcaoDaOrdenacao;
 			};
+
+			carregarContatos();
+			carregarOperadoras();
+
 		});
 	</script>
 </head>
@@ -76,6 +104,7 @@
 	<div class="jumbotron">
 		<h3 ng-bind="app"></h3>
 		<input class="form-control" type="text" ng-model="criterioBusca"  placeholder="O que você está buscando?">
+		{{message}}
 		<table ng-show="contatos.length > 0" class="table table-striped">
 			<tr>
 				<th></th>

@@ -11,10 +11,10 @@ var operadoras =[
 					];
 
 var contatos = [
-				{nome: "Bruno", telefone: "98898899", data: new Date(), operadora: operadoras[0]},
-				{nome: "Sandra", telefone: "98223345", data: new Date(), operadora: operadoras[1]},
-				{nome: "Mariana", telefone: "988966673", data: new Date(), operadora: operadoras[2]}
-				];
+	{nome: "Bruno", telefone: "9999-2222", data: new Date(), operadora: {nome: "Oi", codigo: 14, categoria: "Celular"}},
+	{nome: "Sandra", telefone: "9999-3333", data: new Date(), operadora: {nome: "Vivo", codigo: 15, categoria: "Celular"}},
+	{nome: "Mariana", telefone: "9999-9999", data: new Date(), operadora: {nome: "Tim", codigo: 41, categoria: "Celular"}}
+];
 
 app.get('/operadoras', function(req, res){
 	res.write(JSON.stringify(operadoras));
@@ -27,5 +27,6 @@ app.get('/contatos', function(req, res){
 });
 
 app.post('/contatos', function(req, res){
+	contatos.push(req.body);
 	res.end();
 });
